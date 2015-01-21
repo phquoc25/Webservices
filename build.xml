@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     May 27, 2013 9:52:51 PM                                                        
+
+     project    Hello
+     description: This project is made to training Java: JSP, MVC and how to build with ant 
+                   
+     QuocPhan                                                                
+     ====================================================================== -->
+<project name="SelfieServices" default="default" basedir=".">
+	<description>
+            description
+    </description>
+	<property name="src" value="src" />
+	<property name="build" value="build" />
+	<property name="dist" value="dist" />
+	<property name="webcontent" value="WebContent" />
+	<property name="webinf.dir" value="${webcontent}/WEB-INF" />
+	<property name="tomcat.dir" value="C:/Program Files/Apache Software Foundation/Tomcat 7.0/webapps"/>
+
+	<path id="compile.classpath">
+		<!-- classpath for Jax WS related stuff -->
+		<pathelement path="${webinf.dir}/lib/jaxb-api.jar" />
+		<pathelement path="${webinf.dir}/lib/jaxb-impl.jar" />
+		<pathelement path="${webinf.dir}/lib/jaxws-api.jar" />
+		<pathelement path="${webinf.dir}/lib/jaxws-rt.jar" />
+		<pathelement path="${webinf.dir}/lib/stax-ex.jar" />
+		<pathelement path="${webinf.dir}/lib/streambuffer.jar" />
+		<pathelement path="${classpath}" />
+	</path>
+	<target name="default">
+		<echo>******************************************</echo>
+		<echo>*build-war: build war file               *</echo>
+		<echo>*deploy: deploy project to tomcat server *</echo>
+		<echo>******************************************</echo>
+	</target>
+	<target name="clean">
+		<delete>
+			<fileset dir="${build}">
+				<include name="**/*.*" />
+			</fileset>
+		</delete>
+
+		<delete>
+			<fileset dir="${dist}">
+				<include name="**/*.*" />
+			</fileset>
+		</delete>
+
+		<delete>
+			<fileset dir="${tomcat.dir}">
+				<include name="${ant.project.name}.war" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="compile" depends="clean,init" description="compile the source ">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}" debug="true"> <!--debug="true" to debug on server-->
+			<classpath refid="compile.classpath" />
+		</javac>
+	</target>
+
+	<target name="build-war" depends="compile" description="generate the distribution war">
+
+		<!-- Create the war distribution directory -->
+		<mkdir dir="${dist}/war" />
+		<war destfile="${dist}/war/${ant.project.name}.war" webxml="${webinf.dir}/web.xml">
+			<fileset dir="${webcontent}">
+				<include name="**/*.*" />
+				<exclude name="**/glassfish-web.xml" />
+			</fileset>
+			<classes dir="${build}" />
+		</war>
+	</target>
+
+	<target name="deploy">
+		<delete>
+			<fileset dir="${tomcat.dir}">
+				<include name="${ant.project.name}.war" />
+			</fileset>
+		</delete>
+		<copy todir="${tomcat.dir}">
+			<fileset dir="${dist}/war">
+				<include name="${ant.project.name}.war"/>
+			</fileset>
+		</copy>
+	</target>
+</project>
